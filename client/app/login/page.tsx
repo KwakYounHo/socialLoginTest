@@ -52,6 +52,25 @@ export default function Login({
     return redirect("/login?message=Check email to continue sign in process");
   };
 
+  const facebookSignIn = async () => {
+    "use server";
+
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "facebook",
+      options: {
+        redirectTo: "http://localhost:3000/auth/callback",
+      },
+    });
+
+    if (error) {
+      return redirect("/login?message=페북 로그인은 안된다");
+    }
+
+    return redirect("/auth/callback");
+  };
+
   return (
     <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
       <Link
@@ -112,6 +131,15 @@ export default function Login({
             {searchParams.message}
           </p>
         )}
+      </form>
+      <form className={"animate-in"} action={facebookSignIn}>
+        <button
+          className={
+            "border border-foreground/20 rounded-md px-4 py-2 text-foreground mb-2"
+          }
+        >
+          with Facebook
+        </button>
       </form>
     </div>
   );
